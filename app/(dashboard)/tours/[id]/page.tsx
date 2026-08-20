@@ -339,7 +339,6 @@ export default function TourDetailPage() {
           <ExpenseSummary
             expenses={tour.expenses || []}
             members={tour.members || []}
-            settledPayments={tour.settledPayments || []}
           />
         </motion.div>
       )}
