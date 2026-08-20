@@ -6,6 +6,8 @@ import User from '@/models/User';
 import Tour from '@/models/Tour';
 import Expense from '@/models/Expense';
 
+export const dynamic = 'force-dynamic';
+
 // GET - Get system statistics (admin only)
 export async function GET(req: NextRequest) {
   try {

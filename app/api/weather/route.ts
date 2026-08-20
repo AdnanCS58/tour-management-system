@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Using OpenWeatherMap API (free tier)
-// You'll need to sign up at https://openweathermap.org/api to get an API key
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {

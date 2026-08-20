@@ -3,9 +3,6 @@
 import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
-// Leaflet ships CSS without TypeScript declarations.
-// @ts-expect-error Leaflet CSS is a side-effect import.
-import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers
 const DefaultIcon = L.icon({

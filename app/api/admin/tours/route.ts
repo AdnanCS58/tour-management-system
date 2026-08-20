@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/mongodb';
 import Tour from '@/models/Tour';
 
+export const dynamic = 'force-dynamic';
 // Get all tours (admin only)
 export async function GET(req: NextRequest) {
   try {
