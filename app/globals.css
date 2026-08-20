@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0a0f0d;
+    --surface: #121816;
+    --surface-light: #1a211e;
+    --border: #2a322e;
+    --text-primary: #e8f0eb;
+    --text-secondary: #a0b0a8;
+    --text-muted: #6b7a72;
+    --accent: #10b981;
+    --accent-light: #34d399;
+    --accent-dark: #059669;
+  }
+
+  body {
+    @apply bg-[#0a0f0d] text-[#e8f0eb] antialiased;
+    background-image: 
+      radial-gradient(ellipse at top, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom, rgba(5, 150, 105, 0.05) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-[#121816]/80 backdrop-blur-lg border border-[#2a322e] rounded-2xl shadow-xl;
+  }
+
+  .glass-card-hover {
+    @apply hover:bg-[#1a211e]/90 hover:border-[#3a423e] transition-all duration-300;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-500 transition-all duration-300 shadow-lg shadow-emerald-600/20;
+  }
+
+  .btn-secondary {
+    @apply bg-[#1a211e] text-[#e8f0eb] px-6 py-3 rounded-xl font-semibold border border-[#2a322e] hover:bg-[#222a26] transition-all duration-300;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-[#1a211e] border border-[#2a322e] rounded-xl text-[#e8f0eb] placeholder-[#6b7a72] focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300;
+  }
+
+  .card {
+    @apply bg-[#121816] border border-[#2a322e] rounded-2xl p-6 shadow-xl;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0f0d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a322e;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a423e;
+}
