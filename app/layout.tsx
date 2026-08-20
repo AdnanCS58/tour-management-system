@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
-import Script from 'next/script';
+import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -43,13 +42,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           {children}
-          <Script id="service-worker-registration" strategy="afterInteractive">
-            {`if ('serviceWorker' in navigator) {
-              window.addEventListener('load', function () {
-                navigator.serviceWorker.register('/sw.js').catch(function () {});
-              });
-            }`}
-          </Script>
+          <ServiceWorkerRegistration />
           <Toaster
             position="top-right"
             toastOptions={{
