@@ -294,7 +294,7 @@ export async function POST(
     }
 
     // Create notifications for each recipient
-    for (const recipientId of recipients) {
+    for (const recipientId of Array.from(recipients)) {
       await Notification.create({
         tour: params.id,
         user: recipientId, // Recipient who should receive this notification
