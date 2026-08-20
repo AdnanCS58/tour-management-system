@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
 import ServiceWorkerRegistration from '@/components/ServiceWorkerRegistration';
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'TripTribe',
+  },
+  icons: {
+    apple: '/icon-192x192.png',
   },
 };
 
@@ -34,18 +37,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0a0f0d" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-        <meta name="apple-mobile-web-app-title" content="TripTribe" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-      </head>
       <body className={inter.className}>
         <Providers>
           {children}
-          <ServiceWorkerRegistration />
+
+
           <Toaster
             position="top-right"
             toastOptions={{
