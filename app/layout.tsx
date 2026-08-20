@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-// The global stylesheet is processed by Next.js at build time.
-// @ts-expect-error CSS side-effect imports are not declared by the editor.
 import './globals.css';
 import { Providers } from './providers';
 import { Toaster } from 'react-hot-toast';
