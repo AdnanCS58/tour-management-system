@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import Tour from '@/models/Tour';
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/mongodb";
+import Tour from "@/models/Tour";
 
 export async function GET(
   req: NextRequest,
@@ -9,34 +9,48 @@ export async function GET(
   try {
     await dbConnect();
 
-    const tour = await Tour.findOne({ 
-      invitationCode: params.code.toUpperCase() 
+    const tour = await Tour.findOne({
+      invitationCode: params.code,
     })
-      .select('name destination startDate endDate members owner')
-      .populate('owner', 'name avatar');
+      .populate("owner", "name avatar")
+      .lean();
 
     if (!tour) {
-      return NextResponse.json({ error: 'Tour not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "Tour not found" },
+        { status: 404 }
+      );
     }
 
-    // Return only public information
-    const publicTourInfo = {
+    // Because TypeScript sees owner as ObjectId even after populate,
+    // explicitly treat the populated result as a user object.
+    const owner = tour.owner as unknown as {
+      _id: string;
+      name?: string;
+      avatar?: string;
+    };
+
+    const tourInfo = {
+      id: tour._id,
       name: tour.name,
       destination: tour.destination,
       startDate: tour.startDate,
       endDate: tour.endDate,
+      description: tour.description,
+      coverImage: tour.coverImage,
       membersCount: tour.members.length,
       owner: {
-        name: tour.owner.name,
-        avatar: tour.owner.avatar
-      }
+        name: owner?.name || "Unknown",
+        avatar: owner?.avatar || "",
+      },
     };
 
-    return NextResponse.json(publicTourInfo);
+    return NextResponse.json(tourInfo);
   } catch (error) {
-    console.error('Get tour info error:', error);
+    console.error("Join info error:", error);
+
     return NextResponse.json(
-      { error: 'Failed to fetch tour information' },
+      { error: "Failed to get tour information" },
       { status: 500 }
     );
   }

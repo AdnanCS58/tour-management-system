@@ -77,7 +77,11 @@ export async function POST(req: NextRequest) {
     );
 
     for (const member of otherMembers) {
-      await notifyMemberJoined(tour._id, member.user, user.name);
+      await notifyMemberJoined(
+        tour._id.toString(),
+        member.user.toString(),
+        user.name,
+      );
     }
 
     // Add activity
