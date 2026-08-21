@@ -51,11 +51,14 @@ export async function PUT(
     const tour = await Tour.findById(settlement.tour);
     
     if (tour) {
-      if (!tour.settledPayments) {
-        (tour as any).settledPayments = [];
+      // Use (tour as any) to avoid TypeScript error
+      const tourAny = tour as any;
+      
+      if (!tourAny.settledPayments) {
+        tourAny.settledPayments = [];
       }
       
-      (tour as any).settledPayments.push({
+      tourAny.settledPayments.push({
         from: settlement.from,
         to: settlement.to,
         amount: settlement.amount,
@@ -63,14 +66,14 @@ export async function PUT(
         confirmedAt: new Date(),
       });
       
-      tour.activities.push({
+      tourAny.activities.push({
         user: session.user.id,
         action: 'settlement_confirmed',
         details: `Settlement confirmed: ৳${settlement.amount}`,
         timestamp: new Date(),
       });
       
-      await tour.save();
+      await tourAny.save();
     }
 
     return NextResponse.json({ 
