@@ -52,10 +52,10 @@ export async function PUT(
     
     if (tour) {
       if (!tour.settledPayments) {
-        tour.settledPayments = [];
+        (tour as any).settledPayments = [];
       }
       
-      tour.settledPayments.push({
+      (tour as any).settledPayments.push({
         from: settlement.from,
         to: settlement.to,
         amount: settlement.amount,
