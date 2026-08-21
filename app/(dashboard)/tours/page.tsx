@@ -25,6 +25,7 @@ interface Tour {
   startDate: string;
   endDate: string;
   coverImage?: string;
+  coverImages?: string[];
   invitationCode: string;
   owner?: {
     _id?: string;
@@ -172,8 +173,19 @@ export default function MyToursPage() {
               className="bg-[#121816]/80 backdrop-blur-lg border border-[#2a322e] rounded-2xl overflow-hidden shadow-xl hover:border-[#3a423e] hover:shadow-2xl transition-all duration-300 cursor-pointer group"
               onClick={() => router.push(`/tours/${tour._id}`)}
             >
-              <div className="h-40 bg-gradient-to-br from-emerald-600/30 to-teal-600/30 relative overflow-hidden">
-                {tour.coverImage ? (
+              <div className="h-40 relative overflow-hidden">
+                {tour.coverImages && tour.coverImages.length > 1 ? (
+                  <>
+                    <img 
+                      src={tour.coverImages[0]} 
+                      alt={tour.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
+                      +{tour.coverImages.length - 1} photos
+                    </div>
+                  </>
+                ) : tour.coverImage ? (
                   <img 
                     src={tour.coverImage} 
                     alt={tour.name}

@@ -25,7 +25,11 @@ const TourSchema = new mongoose.Schema({
   },
   coverImage: {
     type: String,
-    default: "", // Can store base64 string
+    default: "",
+  },
+  coverImages: {
+    type: [String],
+    default: [],
   },
   invitationCode: {
     type: String,
@@ -94,7 +98,6 @@ const TourSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-
   settledPayments: [
     {
       from: {
@@ -115,6 +118,9 @@ const TourSchema = new mongoose.Schema({
   ],
 });
 
-const Tour = mongoose.models.Tour || mongoose.model("Tour", TourSchema);
+// Force delete cached model to ensure fresh schema
+delete mongoose.models.Tour;
+
+const Tour = mongoose.model("Tour", TourSchema);
 
 export default Tour;

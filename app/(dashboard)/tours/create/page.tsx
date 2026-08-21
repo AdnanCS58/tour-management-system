@@ -13,7 +13,10 @@ import {
   FiFileText,
   FiArrowLeft,
   FiUpload,
-  FiX
+  FiX,
+  FiPlus,
+  FiChevronLeft,
+  FiChevronRight
 } from 'react-icons/fi';
 
 export default function CreateTourPage() {
@@ -26,50 +29,66 @@ export default function CreateTourPage() {
     endDate: '',
     description: '',
   });
-  const [coverImage, setCoverImage] = useState('');
-  const [imagePreview, setImagePreview] = useState('');
+  const [coverImages, setCoverImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Check file type
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
-      return;
-    }
-
-    // Check file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
+  const handleMultipleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setUploading(true);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64String = event.target?.result as string;
-      setCoverImage(base64String);
-      setImagePreview(base64String);
+    const fileArray = Array.from(files);
+    const validFiles = fileArray.filter(file => {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image file`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} is larger than 5MB`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) {
       setUploading(false);
-      toast.success('Image uploaded successfully!');
-    };
-    reader.onerror = (error) => {
-      console.error('Error reading file:', error);
-      setUploading(false);
-      toast.error('Failed to upload image');
-    };
-    reader.readAsDataURL(file);
+      return;
+    }
+
+    let processedCount = 0;
+    const newImages: string[] = [];
+
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64String = event.target?.result as string;
+        newImages.push(base64String);
+        processedCount++;
+
+        if (processedCount === validFiles.length) {
+          setCoverImages(prev => [...prev, ...newImages]);
+          setUploading(false);
+          toast.success(`${newImages.length} image(s) uploaded successfully!`);
+        }
+      };
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        processedCount++;
+        if (processedCount === validFiles.length) {
+          setUploading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  const removeImage = () => {
-    setCoverImage('');
-    setImagePreview('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+  const removeImage = (index: number) => {
+    setCoverImages(prev => prev.filter((_, i) => i !== index));
+    if (currentPreviewIndex >= index && currentPreviewIndex > 0) {
+      setCurrentPreviewIndex(prev => prev - 1);
     }
   };
 
@@ -81,11 +100,23 @@ export default function CreateTourPage() {
       return;
     }
 
-    // Validate dates
     if (new Date(formData.endDate) < new Date(formData.startDate)) {
       toast.error('End date must be after start date');
       return;
     }
+
+    const requestData = {
+      ...formData,
+      coverImage: coverImages[0] || '',
+      coverImages: coverImages,
+    };
+
+    console.log('📤 Sending data:', {
+      name: requestData.name,
+      coverImageLength: requestData.coverImage?.length || 0,
+      coverImagesCount: requestData.coverImages?.length || 0,
+      coverImagesLengths: requestData.coverImages?.map(img => img.length),
+    });
 
     setLoading(true);
 
@@ -95,13 +126,11 @@ export default function CreateTourPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          coverImage: coverImage || '', // Send base64 image
-        }),
+        body: JSON.stringify(requestData),
       });
 
       const data = await res.json();
+      console.log('📡 Response:', data);
 
       if (res.ok) {
         toast.success('Tour created successfully!');
@@ -122,6 +151,14 @@ export default function CreateTourPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handlePrevPreview = () => {
+    setCurrentPreviewIndex(prev => (prev - 1 + coverImages.length) % coverImages.length);
+  };
+
+  const handleNextPreview = () => {
+    setCurrentPreviewIndex(prev => (prev + 1) % coverImages.length);
   };
 
   return (
@@ -220,38 +257,107 @@ export default function CreateTourPage() {
             </div>
           </div>
 
-          {/* Cover Image Upload */}
+          {/* Cover Images Upload */}
           <div>
             <label className="block text-sm font-medium text-[#e8f0eb] mb-2">
-              Cover Image (optional)
+              Cover Images (optional - multiple)
             </label>
             
-            {!imagePreview ? (
+            {coverImages.length === 0 ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
                 className="border-2 border-dashed border-[#2a322e] rounded-xl p-8 text-center cursor-pointer hover:border-emerald-500 transition bg-[#1a211e]/50"
               >
                 <FiUpload className="w-12 h-12 text-[#6b7a72] mx-auto mb-4" />
                 <p className="text-[#a0b0a8] mb-2">
-                  {uploading ? 'Uploading...' : 'Click to upload an image'}
+                  {uploading ? 'Uploading...' : 'Click to upload images'}
                 </p>
                 <p className="text-sm text-[#6b7a72]">
-                  PNG, JPG, GIF up to 5MB
+                  PNG, JPG, GIF up to 5MB each
+                </p>
+                <p className="text-sm text-[#6b7a72] mt-1">
+                  You can select multiple images
                 </p>
               </div>
             ) : (
-              <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Cover preview"
-                  className="w-full h-64 object-cover rounded-xl border border-[#2a322e]"
-                />
+              <div>
+                {/* Image Preview with Navigation */}
+                <div className="relative rounded-xl overflow-hidden border border-[#2a322e]">
+                  <img
+                    src={coverImages[currentPreviewIndex]}
+                    alt={`Preview ${currentPreviewIndex + 1}`}
+                    className="w-full h-64 object-cover"
+                  />
+                  
+                  {/* Previous Button */}
+                  {coverImages.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={handlePrevPreview}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
+                    >
+                      <FiChevronLeft className="w-5 h-5" />
+                    </button>
+                  )}
+                  
+                  {/* Next Button */}
+                  {coverImages.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={handleNextPreview}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition"
+                    >
+                      <FiChevronRight className="w-5 h-5" />
+                    </button>
+                  )}
+                  
+                  {/* Remove Current Image */}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(currentPreviewIndex)}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                  >
+                    <FiX className="w-4 h-4" />
+                  </button>
+                  
+                  {/* Image Counter */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                    {currentPreviewIndex + 1} / {coverImages.length}
+                  </div>
+                </div>
+
+                {/* Thumbnail Strip */}
+                {coverImages.length > 1 && (
+                  <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                    {coverImages.map((image, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setCurrentPreviewIndex(index)}
+                        className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition ${
+                          index === currentPreviewIndex
+                            ? 'border-emerald-500'
+                            : 'border-[#2a322e] hover:border-[#3a423e]'
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add More Button */}
                 <button
                   type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="mt-3 flex items-center text-emerald-400 hover:text-emerald-300 transition"
                 >
-                  <FiX className="w-5 h-5" />
+                  <FiPlus className="mr-1" />
+                  Add more images
                 </button>
               </div>
             )}
@@ -260,8 +366,9 @@ export default function CreateTourPage() {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              onChange={handleImageChange}
+              onChange={handleMultipleImageChange}
               className="hidden"
+              multiple
             />
           </div>
 
